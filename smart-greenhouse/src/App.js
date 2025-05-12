@@ -33,9 +33,14 @@ function App() {
       </Navbar>
 
       {/* Konten Dashboard */}
-      <Container fluid className="py-4">
+      <Container fluid className="py-4 mb-5">
         <Dashboard />
       </Container>
+
+      {/* Footer */}
+      <footer className="bg-dark text-white text-center py-3">
+        BlueCore 2025
+      </footer>
     </>
   );
 }
