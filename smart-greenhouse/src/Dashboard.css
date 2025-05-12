@@ -5,23 +5,23 @@
   margin-bottom: 1rem;
 }
 
-/* Header biru lembut */
+/* Header hijau lembut */
 .smart-card .card-header {
-  background-color: #8ca1b7;
+  background-color: #73946B;  /* hijau greenhouse */
   color: white;
   font-size: 0.9rem;
   text-align: center;
   padding: 0.5rem 1rem;
 }
 
-/* Body kartu putih */
+/* Body kartu putih */ 
 .smart-card .card-body {
   background-color: white;
   padding: 1rem;
   text-align: center;
 }
 
-/* Untuk kartu temperatur, body sedikit abu-abu */
+/* Card temperature highlight */
 .smart-card--highlight .card-body {
   background-color: #f0f0f0;
 }
@@ -30,5 +30,5 @@
 .alert-text {
   font-size: 0.85rem;
   font-style: italic;
-  color: #dc3545;       /* merah muda untuk perhatian */
+  color: #dc3545; /* tetap merah untuk alert */
 }

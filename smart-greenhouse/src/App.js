@@ -4,26 +4,28 @@ import { Container, Navbar, Nav } from 'react-bootstrap';
 import Dashboard from './Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+const ACCENT = '#537D5D';
+
 function App() {
-  // state untuk menyimpan waktu sekarang
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    // update setiap 1 detik
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   return (
     <>
-      {/* Navbar */}
-      <Navbar bg="dark" variant="dark" expand="lg">
+      {/* Navbar hijau dengan timestamp */}
+      <Navbar expand="lg" style={{ backgroundColor: ACCENT }} variant="dark">
         <Container>
-          <Navbar.Brand href="#">Smart Greenhouse</Navbar.Brand>
+          <Navbar.Brand style={{ fontWeight: 'bold' }}>
+            Smart Greenhouse
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              {/* nanti bisa ditambah link jika perlu */}
+              {/* Tambahkan link jika diperlukan */}
             </Nav>
             <Navbar.Text className="text-white">
               {now.toLocaleString()}
@@ -37,8 +39,18 @@ function App() {
         <Dashboard />
       </Container>
 
-      {/* Footer */}
-      <footer className="bg-dark text-white text-center py-3">
+      {/* Footer hijau */}
+      <footer
+        style={{
+          backgroundColor: ACCENT,
+          color: '#fff',
+          textAlign: 'center',
+          padding: '0.75rem 0',
+          position: 'sticky',
+          bottom: 0,
+          width: '100%'
+        }}
+      >
         BlueCore 2025
       </footer>
     </>
