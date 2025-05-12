@@ -1,0 +1,27 @@
+.smart-card {
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+}
+
+/* Header biru lembut */
+.smart-card .card-header {
+  background-color: #8ca1b7;
+  color: white;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+}
+
+/* Body kartu putih */
+.smart-card .card-body {
+  background-color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Untuk kartu temperatur, body sedikit abu-abu */
+.smart-card--highlight .card-body {
+  background-color: #f0f0f0;
+}

@@ -1,52 +1,72 @@
-// src/Dashboard.js
+// src/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Doughnut } from 'react-chartjs-2';
+import './Dashboard.css';
 import { initialData, simulateUpdate } from './mockData';
 
 export default function Dashboard() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(initialData);
 
   useEffect(() => {
-    // Set data awal dari mock
-    setData(initialData);
-
-    // Simulasikan update setiap 5 detik
-    const intervalId = setInterval(() => {
-      setData(prev => simulateUpdate(prev));
-    }, 5000);
-
-    // Cleanup interval saat unmount
-    return () => clearInterval(intervalId);
+    const id = setInterval(() => setData(d => simulateUpdate(d)), 5000);
+    return () => clearInterval(id);
   }, []);
 
-  const renderCard = (title, value, unit) => (
-    <Card className="text-center mb-4 shadow-sm">
+  // Donut untuk semua selain temperature
+  const renderDonutCard = (title, used, total, unit) => {
+    const chartData = {
+      datasets: [{
+        data: [used, total - used],
+        backgroundColor: ['#007bff', '#e9ecef'],
+        borderWidth: 0
+      }]
+    };
+    const chartOpts = {
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      }
+    };
+    return (
+      <Card className="smart-card shadow-sm">
+        <Card.Header>{title}</Card.Header>
+        <Card.Body>
+          <Doughnut data={chartData} options={chartOpts} />
+          <div className="mt-2">{`${used} ${unit}`}</div>
+        </Card.Body>
+      </Card>
+    );
+  };
+
+  // Card khusus untuk temperature, dengan highlight
+  const renderTempCard = (title, temp) => (
+    <Card className="smart-card smart-card--highlight shadow-sm">
+      <Card.Header>{title}</Card.Header>
       <Card.Body>
-        <Card.Title>{title}</Card.Title>
-        <Card.Text style={{ fontSize: '2rem' }}>
-          {value !== null && value !== undefined
-            ? `${value} ${unit}`
-            : <Spinner animation="border" size="sm" />}
-        </Card.Text>
+        <h2 style={{ color: '#28a745', margin: 0 }}>
+          {temp.toFixed(1)} °C
+        </h2>
       </Card.Body>
     </Card>
   );
 
   return (
-    <Container className="py-4">
+    <Container fluid className="py-4">
       <h1 className="mb-4 text-center">Smart Greenhouse Automation System</h1>
       <Row>
         <Col md={6} lg={3}>
-          {renderCard('Suhu', data?.temperature, '°C')}
+          {renderTempCard('Temperature', data.temperature)}
         </Col>
         <Col md={6} lg={3}>
-          {renderCard('Kelembapan Udara', data?.airHumidity, '%')}
+          {renderDonutCard('Air Humidity', data.airHumidity, 100, '%')}
         </Col>
         <Col md={6} lg={3}>
-          {renderCard('Kelembapan Tanah', data?.soilMoisture, '%')}
+          {renderDonutCard('Soil Moisture', data.soilMoisture, 100, '%')}
         </Col>
         <Col md={6} lg={3}>
-          {renderCard('Intensitas Cahaya', data?.lightIntensity, 'lux')}
+          {renderDonutCard('Light Intensity', data.lightIntensity, 1000, 'lux')}
         </Col>
       </Row>
     </Container>
