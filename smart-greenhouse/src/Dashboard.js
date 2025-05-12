@@ -2,11 +2,42 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card } from 'react-bootstrap';
 import { Doughnut, Line } from 'react-chartjs-2';
-import 'chart.js/auto';
+import Chart from 'chart.js/auto';           // Chart.js full bundle
 import './Dashboard.css';
 import { initialData, simulateUpdate } from './mockData';
 
-// Threshold definitions
+// 1) Daftarkan plugin untuk gambar teks di tengah donut
+const centerTextPlugin = {
+  id: 'centerText',
+  afterDraw(chart) {
+    const { ctx, width, height, config } = chart;
+    const centerOpts = config.options.plugins.centerText;
+    if (!centerOpts) return;
+
+    const text = centerOpts.text;
+    const font = centerOpts.font || 'bold 1.2em sans-serif';
+    const color = centerOpts.color || '#000';
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = font;
+    ctx.textBaseline = 'middle';
+
+    // support array of lines or single string
+    const lines = Array.isArray(text) ? text : [text];
+    lines.forEach((line, i) => {
+      const textMetrics = ctx.measureText(line);
+      const x = (width - textMetrics.width) / 2;
+      // shift each line by 20px, center overall
+      const y = (height / 2) + (i - (lines.length - 1) / 2) * 20;
+      ctx.fillText(line, x, y);
+    });
+
+    ctx.restore();
+  }
+};
+Chart.register(centerTextPlugin);
+
 const thresholds = {
   temperature: [
     { check: v => v < 18, condition: 'Terlalu Dingin', action: 'Nyalakan pemanas' },
@@ -26,69 +57,64 @@ const thresholds = {
   ]
 };
 
-// helper to pick appropriate condition/action
 function evaluateThreshold(param, value) {
-  const rules = thresholds[param] || [];
-  for (let r of rules) if (r.check(value)) return { condition: r.condition, action: r.action };
+  for (let r of (thresholds[param]||[])) {
+    if (r.check(value)) return { condition: r.condition, action: r.action };
+  }
   return { condition: 'Normal', action: '-' };
 }
 
 export default function Dashboard() {
   const [data, setData] = useState(initialData);
   const [history, setHistory] = useState({
-    temperature: [],
-    airHumidity: [],
-    soilMoisture: [],
-    lightIntensity: []
+    temperature: [], airHumidity: [], soilMoisture: [], lightIntensity: []
   });
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const id = setInterval(() => {
       setData(prev => {
         const next = simulateUpdate(prev);
         const now = new Date();
-
         setHistory(h => ({
           temperature:    [...h.temperature.slice(-11),    { time: now, value: next.temperature }],
           airHumidity:    [...h.airHumidity.slice(-11),    { time: now, value: next.airHumidity }],
           soilMoisture:   [...h.soilMoisture.slice(-11),   { time: now, value: next.soilMoisture }],
           lightIntensity: [...h.lightIntensity.slice(-11), { time: now, value: next.lightIntensity }]
         }));
-
         return next;
       });
     }, 5000);
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, []);
 
   const renderDonutCard = (title, used, total, unit, key) => {
     const now = new Date(), hr = now.getHours();
     const isNight = hr < 6 || hr >= 18;
     const { condition, action } = evaluateThreshold(key, used);
-    // hide light alert at night when redup
-    const showAlert = !(key === 'lightIntensity' && isNight && condition === 'Redup');
+    const showAlert = !(key==='lightIntensity' && isNight && condition==='Redup');
 
-    const chartData = {
-      datasets: [{
-        data: [used, Math.max(0, total - used)],
-        backgroundColor: ['#007bff', '#e9ecef'],
-        borderWidth: 0
-      }]
-    };
-    const chartOpts = {
+    const dataChart = { datasets:[{ data:[used, Math.max(0, total-used)], backgroundColor:['#007bff','#e9ecef'], borderWidth:0 }] };
+    const opts = {
       cutout: '70%',
-      plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        centerText: {
+          text: [`${used.toFixed(1)}`, unit],   // two lines: value & unit
+          color: '#333',
+          font: 'bold 1.4em sans-serif'
+        }
+      }
     };
 
     return (
       <Card className="smart-card shadow-sm">
         <Card.Header>{title}</Card.Header>
         <Card.Body>
-          <Doughnut data={chartData} options={chartOpts} />
-          <div className="mt-2">{used} {unit}</div>
+          <Doughnut data={dataChart} options={opts} />
           {showAlert && (
             <div className="alert-text mt-1">
-              <strong>{condition}</strong> &middot; {action}
+              <strong>{condition}</strong> · {action}
             </div>
           )}
         </Card.Body>
@@ -102,9 +128,9 @@ export default function Dashboard() {
       <Card className="smart-card smart-card--highlight shadow-sm">
         <Card.Header>{title}</Card.Header>
         <Card.Body>
-          <h2 style={{ color: '#28a745', margin: 0 }}>{temp.toFixed(1)} °C</h2>
+          <h2 style={{color:'#28a745',margin:0}}>{temp.toFixed(1)} °C</h2>
           <div className="alert-text mt-1">
-            <strong>{condition}</strong> &middot; {action}
+            <strong>{condition}</strong> · {action}
           </div>
         </Card.Body>
       </Card>
@@ -112,33 +138,23 @@ export default function Dashboard() {
   };
 
   const renderLineChart = (title, hist, unit) => {
-    const labels = hist.map(h => h.time.toLocaleTimeString());
-    const dataSet = hist.map(h => h.value);
-    const chartData = {
-      labels,
-      datasets: [{
-        label: title,
-        data: dataSet,
-        fill: false,
-        tension: 0.3,
-        borderColor: '#007bff',
-        pointRadius: 2
-      }]
-    };
-    const chartOpts = {
-      scales: {
-        x: { display: true },
-        y: { beginAtZero: true, title: { display: true, text: unit } }
-      },
-      plugins: { legend: { display: false } },
-      maintainAspectRatio: false
-    };
-
+    const labels = hist.map(h=>h.time.toLocaleTimeString());
+    const values = hist.map(h=>h.value);
     return (
       <Card className="smart-card shadow-sm">
         <Card.Header>{`History: ${title}`}</Card.Header>
-        <Card.Body style={{ height: '200px' }}>
-          <Line data={chartData} options={chartOpts} />
+        <Card.Body style={{height:'200px'}}>
+          <Line
+            data={{
+              labels,
+              datasets: [{ label:title, data: values, fill:false, tension:0.3, borderColor:'#007bff', pointRadius:2 }]
+            }}
+            options={{
+              scales:{ x:{}, y:{ beginAtZero:true, title:{display:true,text:unit} } },
+              plugins:{ legend:{display:false} },
+              maintainAspectRatio:false
+            }}
+          />
         </Card.Body>
       </Card>
     );
@@ -146,39 +162,21 @@ export default function Dashboard() {
 
   return (
     <div className="mt-4">
-      {/* real-time cards */}
       <Row>
-        <Col md={6} lg={3}>
-          {renderTempCard('Temperature', data.temperature)}
-        </Col>
-        <Col md={6} lg={3}>
-          {renderDonutCard('Air Humidity', data.airHumidity, 100, '%', 'airHumidity')}
-        </Col>
-        <Col md={6} lg={3}>
-          {renderDonutCard('Soil Moisture', data.soilMoisture, 100, '%', 'soilMoisture')}
-        </Col>
-        <Col md={6} lg={3}>
-          {renderDonutCard('Light Intensity', data.lightIntensity, 100000, 'lux', 'lightIntensity')}
-        </Col>
+        <Col md={6} lg={3}>{renderTempCard('Temperature', data.temperature)}</Col>
+        <Col md={6} lg={3}>{renderDonutCard('Air Humidity',   data.airHumidity,   100,    '%',           'airHumidity')}</Col>
+        <Col md={6} lg={3}>{renderDonutCard('Soil Moisture',  data.soilMoisture, 100,    '%',           'soilMoisture')}</Col>
+        <Col md={6} lg={3}>{renderDonutCard('Light Intensity',data.lightIntensity,100000,'lux',       'lightIntensity')}</Col>
       </Row>
 
-      {/* historical charts */}
       <h2 className="mt-5 mb-3">Grafik Historis (1 Menit Terakhir)</h2>
       <Row>
-        <Col md={6}>
-          {renderLineChart('Temperature', history.temperature, '°C')}
-        </Col>
-        <Col md={6}>
-          {renderLineChart('Air Humidity', history.airHumidity, '%')}
-        </Col>
+        <Col md={6}>{renderLineChart('Temperature',    history.temperature,    '°C')}</Col>
+        <Col md={6}>{renderLineChart('Air Humidity',   history.airHumidity,    '%')}</Col>
       </Row>
       <Row className="mt-4">
-        <Col md={6}>
-          {renderLineChart('Soil Moisture', history.soilMoisture, '%')}
-        </Col>
-        <Col md={6}>
-          {renderLineChart('Light Intensity', history.lightIntensity, 'lux')}
-        </Col>
+        <Col md={6}>{renderLineChart('Soil Moisture',  history.soilMoisture,   '%')}</Col>
+        <Col md={6}>{renderLineChart('Light Intensity',history.lightIntensity,'lux')}</Col>
       </Row>
     </div>
   );

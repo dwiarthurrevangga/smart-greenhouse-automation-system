@@ -26,7 +26,7 @@ function App() {
               {/* nanti bisa ditambah link jika perlu */}
             </Nav>
             <Navbar.Text className="text-white">
-              Last update: {now.toLocaleString()}
+              {now.toLocaleString()}
             </Navbar.Text>
           </Navbar.Collapse>
         </Container>
