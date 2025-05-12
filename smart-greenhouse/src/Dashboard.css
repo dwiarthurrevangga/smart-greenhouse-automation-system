@@ -25,3 +25,10 @@
 .smart-card--highlight .card-body {
   background-color: #f0f0f0;
 }
+
+/* teks kondisi & aksi */
+.alert-text {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #dc3545;       /* merah muda untuk perhatian */
+}

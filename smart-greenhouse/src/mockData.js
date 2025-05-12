@@ -3,7 +3,7 @@ export const initialData = {
   temperature: 25,       // °C
   airHumidity: 60,       // %
   soilMoisture: 40,      // %
-  lightIntensity: 800    // lux
+  lightIntensity: 20000    // lux
 };
 
 /**
