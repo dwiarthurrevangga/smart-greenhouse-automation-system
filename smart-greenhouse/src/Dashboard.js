@@ -71,45 +71,41 @@ const INFO_COLOR = "#D2D0A0"; // untuk teks nilai
 const thresholds = {
   temperature: [
     {
-      check: (v) => v < 18,
-      condition: "Terlalu Dingin",
-      action: "Nyalakan pemanas",
+      check: (v) => v < 25,
+      condition: "Dingin",
+      action: "Nyalakan intake fan",
     },
     {
       check: (v) => v > 32,
-      condition: "Terlalu Panas",
-      action: "Aktifkan pendingin",
+      condition: "Panas",
+      action: "Nyalakan exhaust fan",
     },
   ],
   airHumidity: [
     {
-      check: (v) => v < 40,
+      check: (v) => v < 70,
       condition: "Kering",
-      action: "Aktifkan humidifier",
-    },
-    {
-      check: (v) => v > 80,
-      condition: "Lembab",
-      action: "Aktifkan dehumidifier",
+      action: "Nyalakan intake fan",
     },
   ],
   soilMoisture: [
-    { check: (v) => v < 30, condition: "Kering", action: "Nyalakan irigasi" },
-    { check: (v) => v > 70, condition: "Basah", action: "Matikan irigasi" },
+    { check: (v) => v < 40, condition: "Kering", action: "Aktifkan pompa air" },
+    { check: (v) => v > 75, condition: "Lembab", action: "Matikan pompa" },
   ],
   lightIntensity: [
     {
       check: (v) => v < 20000,
       condition: "Redup",
-      action: "Nyalakan lampu buatan",
+      action: "Buka tirai / nyalakan lampu",
     },
     {
       check: (v) => v > 40000,
-      condition: "Terlalu Terang",
-      action: "Aktifkan tirai/shading",
+      condition: "Terlalu terang",
+      action: "Tutup tirai",
     },
   ],
 };
+
 function evaluateThreshold(param, value) {
   for (let r of thresholds[param] || []) {
     if (r.check(value)) return { condition: r.condition, action: r.action };
@@ -489,8 +485,8 @@ export default function Dashboard() {
       }
     };
 
-    const labels = hist.map((h) => formatTime(h.time)).reverse();
-    const values = hist.map((h) => h.value).reverse();
+    const labels = hist.map((h) => formatTime(h.time));
+    const values = hist.map((h) => h.value);
 
     return (
       <Card className="smart-card shadow">

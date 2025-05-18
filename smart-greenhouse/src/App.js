@@ -33,7 +33,7 @@ function App() {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="#dashboard" className="text-white">
+              <Nav.Link href="dashboard" className="text-white">
                 Dashboard
               </Nav.Link>
             </Nav>
