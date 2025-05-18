@@ -543,25 +543,59 @@ export default function Dashboard() {
   };
   return (
     <Container fluid>
-      {/* Header with current status */}
-      <Row className="align-items-center mb-3">
-        <Col>
-          <h2>Informasi Greenhouse</h2>
-          {loading ? (
-            <p className="text-muted">Memuat data...</p>
-          ) : (
-            <p className="text-muted">
-              Update terakhir:{" "}
-              {history.temperature.length > 0
-                ? format(
-                    history.temperature[history.temperature.length - 1].time,
-                    "dd MMM yyyy HH:mm:ss"
-                  )
-                : "Tidak ada data"}
-            </p>
+      {/* Current readings section */}
+      <h3 className="mb-3">Pembacaan Terkini</h3>
+      <Col>
+        {loading ? (
+          <p className="text-muted">Memuat data...</p>
+        ) : (
+          <p className="text-muted">
+            Update terakhir:{" "}
+            {history.temperature.length > 0
+              ? format(
+                  history.temperature[history.temperature.length - 1].time,
+                  "dd MMM yyyy HH:mm:ss"
+                )
+              : "Tidak ada data"}
+          </p>
+        )}
+      </Col>
+      {/* Temperature di tengah atas */}
+      <Row className="justify-content-center mb-4">
+        <Col xs={12} md={6} lg={4}>
+          {renderTempCard("Suhu", data.temperature)}
+        </Col>
+      </Row>
+      {/* Tiga donut parameter */}
+      <Row>
+        <Col md={6} lg={4} className="mb-4">
+          {renderDonutCard(
+            "Kelembapan Udara",
+            data.airHumidity,
+            100,
+            "%",
+            "airHumidity"
           )}
         </Col>
-      </Row>{" "}
+        <Col md={6} lg={4} className="mb-4">
+          {renderDonutCard(
+            "Kelembapan Tanah",
+            data.soilMoisture,
+            100,
+            "%",
+            "soilMoisture"
+          )}
+        </Col>
+        <Col md={6} lg={4} className="mb-4">
+          {renderDonutCard(
+            "Intensitas Cahaya",
+            data.lightIntensity,
+            100000,
+            "lux",
+            "lightIntensity"
+          )}
+        </Col>
+      </Row>
       {/* Time filter controls */}
       <Card className="shadow-sm mb-4">
         <Card.Body>
@@ -647,44 +681,6 @@ export default function Dashboard() {
           </Row>
         </Card.Body>
       </Card>
-      {/* Current readings section */}
-      <h3 className="mb-3">Pembacaan Terkini</h3>
-      {/* Temperature di tengah atas */}
-      <Row className="justify-content-center mb-4">
-        <Col xs={12} md={6} lg={4}>
-          {renderTempCard("Suhu", data.temperature)}
-        </Col>
-      </Row>
-      {/* Tiga donut parameter */}
-      <Row>
-        <Col md={6} lg={4} className="mb-4">
-          {renderDonutCard(
-            "Kelembapan Udara",
-            data.airHumidity,
-            100,
-            "%",
-            "airHumidity"
-          )}
-        </Col>
-        <Col md={6} lg={4} className="mb-4">
-          {renderDonutCard(
-            "Kelembapan Tanah",
-            data.soilMoisture,
-            100,
-            "%",
-            "soilMoisture"
-          )}
-        </Col>
-        <Col md={6} lg={4} className="mb-4">
-          {renderDonutCard(
-            "Intensitas Cahaya",
-            data.lightIntensity,
-            100000,
-            "lux",
-            "lightIntensity"
-          )}
-        </Col>
-      </Row>
       {/* Grafik historis */}
       <h3 className="mt-5 mb-3">
         Grafik Historis
