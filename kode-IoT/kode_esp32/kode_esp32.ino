@@ -8,8 +8,8 @@
 #define WIFI_PASSWORD "abangggg"
 
 // === Firebase === (Legacy Token Style)
-#define DATABASE_HOST -
-#define DATABASE_SECRET -
+#define DATABASE_HOST "greenhouse-457a1-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define DATABASE_SECRET "YVyVImsYNhOLUxoqMUOWYHCL2szKdOZXc5SDbhDm"
 
 FirebaseData fbdo;
 FirebaseAuth auth;
