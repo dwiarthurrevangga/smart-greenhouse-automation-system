@@ -295,7 +295,9 @@ export default function Dashboard() {
     const values = dataArray.map((item) => item[key]);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const avg = values.reduce((a, b) => a + b, 0) / values.length || 0;
+    const avg = (
+      values.reduce((a, b) => a + b, 0) / values.length || 0
+    ).toFixed(3);
     return { min, max, avg };
   };
 
@@ -805,7 +807,7 @@ export default function Dashboard() {
             <Card.Header>Suhu</Card.Header>
             <Card.Body>
               <h2 className="mb-0" style={{ color: INFO_COLOR }}>
-                {stats.temperature.avg.toFixed(1)} °C
+                {stats.temperature.avg} °C
               </h2>
               <div className="mt-2">
                 <small className="text-muted">
@@ -824,7 +826,7 @@ export default function Dashboard() {
             <Card.Header>Kelembapan Udara</Card.Header>
             <Card.Body>
               <h2 className="mb-0" style={{ color: INFO_COLOR }}>
-                {stats.airHumidity.avg.toFixed(1)}%
+                {stats.airHumidity.avg}%
               </h2>
               <div className="mt-2">
                 <small className="text-muted">
@@ -843,7 +845,7 @@ export default function Dashboard() {
             <Card.Header>Kelembapan Tanah</Card.Header>
             <Card.Body>
               <h2 className="mb-0" style={{ color: INFO_COLOR }}>
-                {stats.soilMoisture.avg.toFixed(1)}%
+                {stats.soilMoisture.avg}%
               </h2>
               <div className="mt-2">
                 <small className="text-muted">
@@ -862,7 +864,7 @@ export default function Dashboard() {
             <Card.Header>Intensitas Cahaya</Card.Header>
             <Card.Body>
               <h2 className="mb-0" style={{ color: INFO_COLOR }}>
-                {stats.lightIntensity.avg.toFixed(1)} lux
+                {stats.lightIntensity.avg} lux
               </h2>
               <div className="mt-2">
                 <small className="text-muted">
