@@ -140,50 +140,61 @@ export default function Dashboard() {
 
   // Load data from Firebase
   useEffect(() => {
-    const dataLogsRef = ref(database, "data_logs");
-    const recentDataQuery = query(
-      dataLogsRef,
-      orderByChild("timestamp"),
-      limitToLast(100)
-    );
+    const fetchData = () => {
+      const dataLogsRef = ref(database, "data_logs");
+      const recentDataQuery = query(
+        dataLogsRef,
+        orderByChild("timestamp"),
+        limitToLast(100)
+      );
 
-    // Listen for real-time updates
-    const unsubscribe = onValue(recentDataQuery, (snapshot) => {
-      if (snapshot.exists()) {
-        const dataArray = [];
+      get(recentDataQuery).then((snapshot) => {
+        if (!snapshot.exists()) {
+          console.log("No data available");
+          setLoading(false);
+          return;
+        }
+
+        const rawData = [];
         snapshot.forEach((childSnapshot) => {
           const item = childSnapshot.val();
           item.id = childSnapshot.key;
-          // Convert timestamp to date object
-          item.date = new Date(item.timestamp);
-          dataArray.push(item);
+          rawData.push(item);
         });
 
-        // Sort by timestamp
-        dataArray.sort((a, b) => a.timestamp - b.timestamp);
-        setAllData(dataArray);
+        if (rawData.length === 0) return;
 
-        // Set current data to most recent reading
-        if (dataArray.length > 0) {
-          const lastReading = dataArray[dataArray.length - 1];
-          setData({
-            temperature: lastReading.suhu,
-            airHumidity: lastReading.kelembapan_udara,
-            soilMoisture: lastReading.kelembapan_tanah,
-            lightIntensity: lastReading.intensitas_cahaya,
-          });
+        const maxFakeTimestamp = Math.max(
+          ...rawData.map((d) => d.timestamp || 0)
+        );
+        const now = Date.now();
+        const offset = now - maxFakeTimestamp;
 
-          // Process history data for charts
-          updateHistoryFromArray(dataArray);
-        }
+        const rebased = rawData.map((d) => ({
+          ...d,
+          timestamp: d.timestamp + offset,
+          date: new Date(d.timestamp + offset),
+        }));
+
+        rebased.sort((a, b) => a.timestamp - b.timestamp);
+        setAllData(rebased);
+
+        const last = rebased[rebased.length - 1];
+        setData({
+          temperature: last.suhu,
+          airHumidity: last.kelembapan_udara,
+          soilMoisture: last.kelembapan_tanah,
+          lightIntensity: last.intensitas_cahaya,
+        });
+
+        updateHistoryFromArray(rebased);
         setLoading(false);
-      } else {
-        console.log("No data available");
-        setLoading(false);
-      }
-    });
+      });
+    };
 
-    return () => unsubscribe();
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // Update history when time filter changes
@@ -478,8 +489,8 @@ export default function Dashboard() {
       }
     };
 
-    const labels = hist.map((h) => formatTime(h.time));
-    const values = hist.map((h) => h.value);
+    const labels = hist.map((h) => formatTime(h.time)).reverse();
+    const values = hist.map((h) => h.value).reverse();
 
     return (
       <Card className="smart-card shadow">

@@ -36,12 +36,6 @@ function App() {
               <Nav.Link href="#dashboard" className="text-white">
                 Dashboard
               </Nav.Link>
-              <Nav.Link href="#settings" className="text-white">
-                Settings
-              </Nav.Link>
-              <Nav.Link href="#help" className="text-white">
-                Help
-              </Nav.Link>
             </Nav>
             <div className="d-flex align-items-center">
               <div
