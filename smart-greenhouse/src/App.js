@@ -86,7 +86,7 @@ function App() {
             <div>
               <span>BlueCore 2025</span>
               <a
-                href="https://github.com"
+                href="https://github.com/dwiarthurrevangga/smart-greenhouse-automation-system"
                 className="text-white ms-3"
                 target="_blank"
                 rel="noreferrer"

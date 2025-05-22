@@ -106,7 +106,8 @@ void loop() {
   // === Kirim ke Firebase ===
   if (Firebase.ready()) {
     FirebaseJson json;
-    json.set("timestamp", millis());
+    unsigned long epochTime = time(NULL)*1000;
+    json.set("timestamp", epochTime);
     json.set("suhu", suhu);
     json.set("kelembapan_udara", kelembapan_udara);
     json.set("intensitas_cahaya", intensitas_lux);
@@ -126,24 +127,21 @@ void loop() {
   }
 
   // === Logika Aktuator ===
-  if (suhu > 32.0) {
+  if (suhu > 29.0) {
     digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    digitalWrite(IN1, LOW);  digitalWrite(IN2, LOW);
-  } else if (suhu < 25.0 || kelembapan_udara < 70.0) {
-    digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    digitalWrite(IN3, LOW);  digitalWrite(IN4, LOW);
+    digitalWrite(IN1, HIGH);  digitalWrite(IN2, LOW);
   } else {
     digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
   }
 
-  if (kelembapan_tanah < 40.0) {
+  if (kelembapan_tanah < 90.0) {
     digitalWrite(WATER_PUMP_PIN_IN1, HIGH);
     digitalWrite(WATER_PUMP_PIN_IN2, LOW);
     delay(3000);
     digitalWrite(WATER_PUMP_PIN_IN1, LOW);
     digitalWrite(WATER_PUMP_PIN_IN2, LOW);
-  } else if (kelembapan_tanah > 75.0) {
+  } else if (kelembapan_tanah > 200.0) {
     digitalWrite(WATER_PUMP_PIN_IN1, LOW);
     digitalWrite(WATER_PUMP_PIN_IN2, LOW);
   }
@@ -154,5 +152,5 @@ void loop() {
     myServo.write(0);
   }
 
-  delay(5000);
+  delay(5000);
 }
